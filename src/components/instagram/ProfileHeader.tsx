@@ -1,6 +1,8 @@
 import { InstagramProfile } from '@/types/instagram';
-import { BadgeCheck, Lock, ExternalLink } from 'lucide-react';
+import { BadgeCheck, Lock, ExternalLink, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 
 interface ProfileHeaderProps {
   profile: InstagramProfile;
@@ -17,6 +19,12 @@ function formatNumber(num: number): string {
 }
 
 export function ProfileHeader({ profile }: ProfileHeaderProps) {
+  const navigate = useNavigate();
+
+  const handleViewProfile = () => {
+    navigate(`/profile/${profile.username}`);
+  };
+
   return (
     <div className="glass rounded-2xl p-6 md:p-8 animate-fade-in">
       <div className="flex flex-col md:flex-row gap-6 md:gap-10 items-center md:items-start">
@@ -92,6 +100,15 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
               {new URL(profile.external_url).hostname.replace('www.', '')}
             </a>
           )}
+
+          {/* View Profile Button */}
+          <Button
+            onClick={handleViewProfile}
+            className="w-full md:w-auto mt-6 instagram-gradient text-white font-semibold hover:opacity-90 transition-opacity gap-2"
+          >
+            Ver Perfil Completo
+            <ChevronRight className="w-4 h-4" />
+          </Button>
         </div>
       </div>
     </div>
