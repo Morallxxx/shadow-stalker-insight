@@ -1,6 +1,15 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
-import { Heart, MessageCircle, Send, Bookmark, MoreHorizontal, Lock, Camera, Home, Search, PlusSquare, Play, Users, Star } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Heart, MessageCircle, Send, Bookmark, MoreHorizontal, Lock, Camera, Home, Search, PlusSquare, Play, Users, Star, Crown, Sparkles } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 import { useInstagramProfile } from '@/hooks/useInstagramProfile';
 import { ProfileSkeleton, PostGridSkeleton } from '@/components/instagram/LoadingSkeleton';
 import { ErrorMessage } from '@/components/instagram/ErrorMessage';
@@ -40,6 +49,7 @@ const ProfileView = () => {
   const { username } = useParams<{ username: string }>();
   const navigate = useNavigate();
   const { profile, posts, loading, error, searchProfile } = useInstagramProfile();
+  const [showPremiumDialog, setShowPremiumDialog] = useState(false);
 
   useEffect(() => {
     if (username) {
@@ -48,11 +58,73 @@ const ProfileView = () => {
   }, [username]);
 
   const handleUnlock = () => {
+    setShowPremiumDialog(true);
+  };
+
+  const handleConfirmUnlock = () => {
+    setShowPremiumDialog(false);
     window.open(UNLOCK_URL, '_blank');
   };
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Premium Unlock Dialog */}
+      <Dialog open={showPremiumDialog} onOpenChange={setShowPremiumDialog}>
+        <DialogContent className="sm:max-w-md mx-4 rounded-2xl bg-gradient-to-br from-background via-background to-pink-500/5 border-pink-500/20">
+          <DialogHeader className="text-center">
+            <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-gradient-to-r from-pink-500 via-red-500 to-orange-500 flex items-center justify-center">
+              <Crown className="w-8 h-8 text-white" />
+            </div>
+            <DialogTitle className="text-xl font-bold text-center flex items-center justify-center gap-2">
+              <Sparkles className="w-5 h-5 text-yellow-500" />
+              Versão Premium
+              <Sparkles className="w-5 h-5 text-yellow-500" />
+            </DialogTitle>
+            <DialogDescription className="text-center space-y-3 pt-2">
+              <p className="text-muted-foreground">
+                Para acessar este conteúdo exclusivo, você precisa desbloquear a <span className="text-pink-500 font-semibold">versão premium</span> da ferramenta.
+              </p>
+              <div className="bg-muted/50 rounded-xl p-4 space-y-2">
+                <p className="text-sm font-semibold text-foreground">✨ Benefícios Premium:</p>
+                <ul className="text-sm text-muted-foreground space-y-1.5">
+                  <li className="flex items-center gap-2">
+                    <Lock className="w-3.5 h-3.5 text-green-500" />
+                    Acesso a fotos e vídeos privados
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Send className="w-3.5 h-3.5 text-pink-500" />
+                    Ver mensagens ocultas no Direct
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Star className="w-3.5 h-3.5 text-green-500" />
+                    Stories de Close Friends
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Users className="w-3.5 h-3.5 text-blue-500" />
+                    Lista completa de seguidores
+                  </li>
+                </ul>
+              </div>
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex-col gap-2 sm:flex-col">
+            <Button
+              onClick={handleConfirmUnlock}
+              className="w-full bg-gradient-to-r from-pink-500 via-red-500 to-orange-500 text-white font-bold py-6 rounded-xl shadow-lg shadow-pink-500/30 hover:shadow-pink-500/50 transition-all"
+            >
+              <Crown className="w-5 h-5 mr-2" />
+              DESBLOQUEAR AGORA
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => setShowPremiumDialog(false)}
+              className="w-full text-muted-foreground"
+            >
+              Talvez depois
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       {/* Instagram-style Mobile Header - Feed Style */}
       <header className="sticky top-0 z-50 border-b border-border/50 bg-background/95 backdrop-blur-xl">
         <div className="flex items-center justify-between px-4 py-3">
