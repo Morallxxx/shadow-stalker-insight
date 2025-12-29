@@ -1,10 +1,9 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
-import { ArrowLeft, MoreHorizontal, Grid3X3, Bookmark, UserSquare2, BadgeCheck, Lock, ExternalLink, Heart, MessageCircle, Play, Settings } from 'lucide-react';
+import { Heart, MessageCircle, Send, Bookmark, MoreHorizontal, Lock, Camera, Home, Search, PlusSquare, Play, Users, Star } from 'lucide-react';
 import { useInstagramProfile } from '@/hooks/useInstagramProfile';
 import { ProfileSkeleton, PostGridSkeleton } from '@/components/instagram/LoadingSkeleton';
 import { ErrorMessage } from '@/components/instagram/ErrorMessage';
-import { Button } from '@/components/ui/button';
 
 function formatNumber(num: number): string {
   if (num >= 1000000) {
@@ -15,6 +14,27 @@ function formatNumber(num: number): string {
   }
   return num.toLocaleString('pt-BR');
 }
+
+const UNLOCK_URL = "https://desbloqueio.com.br";
+
+// Mock data para stories de close friends bloqueados
+const closeFriendsStories = [
+  { id: 1, username: 'maria_oculta', hasStory: true },
+  { id: 2, username: 'joao_privado', hasStory: true },
+  { id: 3, username: 'ana_secret', hasStory: true },
+  { id: 4, username: 'pedro_cf', hasStory: true },
+  { id: 5, username: 'julia_hidden', hasStory: true },
+  { id: 6, username: 'lucas_priv', hasStory: true },
+];
+
+// Mock data para mensagens ocultas no Direct
+const hiddenMessages = [
+  { id: 1, name: 'Julia 🔥', gender: 'female', unread: 3, preview: 'Mensagem oculta...' },
+  { id: 2, name: 'Pedro', gender: 'male', unread: 1, preview: 'Foto enviada 📷' },
+  { id: 3, name: 'Mariana ❤️', gender: 'female', unread: 5, preview: 'Áudio recebido 🎤' },
+  { id: 4, name: 'Rafael', gender: 'male', unread: 2, preview: 'Vídeo enviado 🎥' },
+  { id: 5, name: 'Camila 💋', gender: 'female', unread: 8, preview: 'Reagiu à sua foto...' },
+];
 
 const ProfileView = () => {
   const { username } = useParams<{ username: string }>();
@@ -27,34 +47,32 @@ const ProfileView = () => {
     }
   }, [username]);
 
+  const handleUnlock = () => {
+    window.open(UNLOCK_URL, '_blank');
+  };
+
   return (
     <div className="min-h-screen bg-background">
-      {/* Instagram-style Mobile Header */}
+      {/* Instagram-style Mobile Header - Feed Style */}
       <header className="sticky top-0 z-50 border-b border-border/50 bg-background/95 backdrop-blur-xl">
         <div className="flex items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-3">
-            <button 
-              onClick={() => navigate('/')}
-              className="p-1 hover:opacity-70 transition-opacity"
-            >
-              <ArrowLeft className="w-6 h-6 text-foreground" />
-            </button>
-            <div className="flex items-center gap-1">
-              {profile?.is_private && <Lock className="w-4 h-4 text-muted-foreground" />}
-              <span className="text-lg font-semibold text-foreground">
-                {profile?.username || username}
-              </span>
-              {profile?.is_verified && (
-                <BadgeCheck className="w-5 h-5 text-verified fill-verified stroke-background" />
-              )}
-            </div>
+          <div className="flex items-center">
+            <span className="text-2xl font-bold bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 bg-clip-text text-transparent font-instagram">
+              Instagram
+            </span>
           </div>
           <div className="flex items-center gap-4">
-            <button className="p-1 hover:opacity-70 transition-opacity">
-              <Settings className="w-6 h-6 text-foreground" />
+            <button className="p-1 hover:opacity-70 transition-opacity relative" onClick={handleUnlock}>
+              <Heart className="w-6 h-6 text-foreground" />
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center">
+                9
+              </span>
             </button>
-            <button className="p-1 hover:opacity-70 transition-opacity">
-              <MoreHorizontal className="w-6 h-6 text-foreground" />
+            <button className="p-1 hover:opacity-70 transition-opacity relative" onClick={handleUnlock}>
+              <Send className="w-6 h-6 text-foreground" />
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
+                {hiddenMessages.reduce((acc, m) => acc + m.unread, 0)}
+              </span>
             </button>
           </div>
         </div>
@@ -76,189 +94,269 @@ const ProfileView = () => {
           </div>
         )}
 
-        {/* Profile Content */}
+        {/* Feed Content - Instagram Home Style */}
         {profile && !loading && (
           <div className="animate-fade-in">
-            {/* Profile Header Section */}
-            <div className="px-4 py-4">
-              <div className="flex items-start gap-6">
-                {/* Profile Picture */}
-                <div className="relative shrink-0">
-                  <div className="w-20 h-20 md:w-24 md:h-24 rounded-full p-[2px] instagram-gradient">
-                    <img
-                      src={profile.profile_pic_url}
-                      alt={profile.full_name}
-                      className="w-full h-full rounded-full object-cover bg-background"
-                    />
-                  </div>
-                </div>
-
-                {/* Stats Row - Instagram Style */}
-                <div className="flex-1 flex items-center justify-around pt-2">
-                  <div className="text-center">
-                    <span className="block font-bold text-lg text-foreground">
-                      {formatNumber(profile.posts_count)}
-                    </span>
-                    <span className="text-sm text-muted-foreground">publicações</span>
-                  </div>
-                  <div className="text-center">
-                    <span className="block font-bold text-lg text-foreground">
-                      {formatNumber(profile.followers)}
-                    </span>
-                    <span className="text-sm text-muted-foreground">seguidores</span>
-                  </div>
-                  <div className="text-center">
-                    <span className="block font-bold text-lg text-foreground">
-                      {formatNumber(profile.following)}
-                    </span>
-                    <span className="text-sm text-muted-foreground">seguindo</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Name & Bio */}
-              <div className="mt-4">
-                <h2 className="font-semibold text-foreground">{profile.full_name}</h2>
-                {profile.biography && (
-                  <p className="text-sm text-foreground/90 whitespace-pre-line mt-1 leading-relaxed">
-                    {profile.biography}
-                  </p>
-                )}
-                {profile.external_url && (
-                  <a
-                    href={profile.external_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 mt-2 text-sm font-medium text-verified hover:underline"
-                  >
-                    {new URL(profile.external_url).hostname.replace('www.', '')}
-                  </a>
-                )}
-              </div>
-
-              {/* Action Buttons - Instagram Style */}
-              <div className="flex gap-2 mt-4">
-                <Button 
-                  className="flex-1 bg-primary/10 hover:bg-primary/20 text-foreground border-0"
-                  variant="outline"
-                >
-                  Seguir
-                </Button>
-                <Button 
-                  className="flex-1 bg-primary/10 hover:bg-primary/20 text-foreground border-0"
-                  variant="outline"
-                >
-                  Mensagem
-                </Button>
-                <Button 
-                  className="px-4 bg-primary/10 hover:bg-primary/20 text-foreground border-0"
-                  variant="outline"
-                  size="icon"
-                >
-                  <UserSquare2 className="w-5 h-5" />
-                </Button>
-              </div>
-            </div>
-
-            {/* Stories Highlights Placeholder */}
-            <div className="px-4 py-2">
-              <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
-                {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="flex flex-col items-center gap-1 shrink-0">
-                    <div className="w-16 h-16 rounded-full border-2 border-border bg-muted flex items-center justify-center">
-                      <span className="text-2xl text-muted-foreground">+</span>
+            {/* Stories Section - Close Friends Ocultos */}
+            <div className="border-b border-border/50">
+              <div className="flex gap-4 px-4 py-3 overflow-x-auto scrollbar-hide">
+                {/* User's own story */}
+                <div className="flex flex-col items-center gap-1 shrink-0">
+                  <div className="relative">
+                    <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-border">
+                      <img
+                        src={profile.profile_pic_url}
+                        alt={profile.username}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
-                    <span className="text-xs text-muted-foreground">Destaque</span>
+                    <div className="absolute bottom-0 right-0 bg-blue-500 rounded-full p-0.5 border-2 border-background">
+                      <PlusSquare className="w-3 h-3 text-white" />
+                    </div>
                   </div>
+                  <span className="text-xs text-foreground">Seu story</span>
+                </div>
+
+                {/* Close Friends Stories - BLOQUEADOS */}
+                {closeFriendsStories.map((story) => (
+                  <button
+                    key={story.id}
+                    onClick={handleUnlock}
+                    className="flex flex-col items-center gap-1 shrink-0 group"
+                  >
+                    <div className="relative">
+                      {/* Close Friends Ring (Green) */}
+                      <div className="w-16 h-16 rounded-full p-[2px] bg-gradient-to-tr from-green-400 to-green-600">
+                        <div className="w-full h-full rounded-full bg-background p-0.5">
+                          <div className="w-full h-full rounded-full bg-muted flex items-center justify-center relative overflow-hidden">
+                            <div className="absolute inset-0 bg-gradient-to-br from-green-500/30 to-green-700/30 backdrop-blur-sm" />
+                            <Lock className="w-5 h-5 text-green-400 z-10" />
+                          </div>
+                        </div>
+                      </div>
+                      {/* Close Friends Badge */}
+                      <div className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 bg-green-500 rounded-full px-1.5 py-0.5 flex items-center gap-0.5">
+                        <Star className="w-2.5 h-2.5 text-white fill-white" />
+                        <span className="text-[8px] text-white font-bold">CF</span>
+                      </div>
+                    </div>
+                    <span className="text-xs text-muted-foreground truncate w-16 text-center">
+                      {story.username.slice(0, 8)}...
+                    </span>
+                  </button>
                 ))}
               </div>
             </div>
 
-            {/* Tab Navigation - Instagram Style */}
-            <div className="flex border-t border-border mt-2">
-              <button className="flex-1 py-3 flex items-center justify-center border-b-2 border-foreground">
-                <Grid3X3 className="w-6 h-6 text-foreground" />
-              </button>
-              <button className="flex-1 py-3 flex items-center justify-center text-muted-foreground">
-                <UserSquare2 className="w-6 h-6" />
-              </button>
+            {/* Hidden Direct Messages Section */}
+            <div className="bg-gradient-to-r from-pink-500/10 via-red-500/10 to-orange-500/10 border-b border-border/50">
+              <div className="px-4 py-3">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <Send className="w-5 h-5 text-pink-500" />
+                    <span className="font-semibold text-foreground">Mensagens Ocultas</span>
+                    <span className="bg-pink-500 text-white text-xs px-2 py-0.5 rounded-full font-bold">
+                      🔥 TOM QUENTE
+                    </span>
+                  </div>
+                  <button 
+                    onClick={handleUnlock}
+                    className="text-xs bg-gradient-to-r from-pink-500 to-orange-500 text-white px-3 py-1.5 rounded-full font-semibold"
+                  >
+                    Desbloquear
+                  </button>
+                </div>
+                
+                <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-1">
+                  {hiddenMessages.map((msg) => (
+                    <button
+                      key={msg.id}
+                      onClick={handleUnlock}
+                      className="flex flex-col items-center gap-1.5 shrink-0"
+                    >
+                      <div className="relative">
+                        <div className={`w-14 h-14 rounded-full p-[2px] ${
+                          msg.gender === 'female' 
+                            ? 'bg-gradient-to-tr from-pink-500 via-red-500 to-orange-500' 
+                            : 'bg-gradient-to-tr from-blue-500 via-purple-500 to-pink-500'
+                        }`}>
+                          <div className="w-full h-full rounded-full bg-background p-0.5">
+                            <div className="w-full h-full rounded-full bg-muted flex items-center justify-center relative overflow-hidden">
+                              <div className="absolute inset-0 backdrop-blur-md bg-black/40" />
+                              <Lock className="w-4 h-4 text-white z-10" />
+                            </div>
+                          </div>
+                        </div>
+                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold">
+                          {msg.unread}
+                        </span>
+                      </div>
+                      <span className="text-[10px] text-foreground truncate w-14 text-center font-medium">
+                        {msg.name}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
 
-            {/* Posts Grid - Instagram Style */}
-            {posts.length === 0 ? (
-              <div className="text-center py-16 text-muted-foreground">
-                <Grid3X3 className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p>Nenhuma publicação ainda</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-3 gap-[1px] bg-border">
-                {posts.map((post) => (
-                  <a
-                    key={post.id}
-                    href={post.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="relative aspect-square group overflow-hidden bg-muted"
-                  >
-                    <img
-                      src={post.thumbnail_url || post.display_url}
-                      alt={post.caption?.slice(0, 50) || 'Instagram post'}
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                    />
-
-                    {/* Video Indicator */}
-                    {post.is_video && (
-                      <div className="absolute top-2 right-2 text-foreground drop-shadow-lg">
-                        <Play className="w-5 h-5 fill-current" />
+            {/* Feed Posts - Privados de Amigos */}
+            <div className="divide-y divide-border/50">
+              {posts.length === 0 ? (
+                <div className="text-center py-16 text-muted-foreground">
+                  <Camera className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p>Nenhuma publicação ainda</p>
+                </div>
+              ) : (
+                posts.map((post, index) => (
+                  <article key={post.id} className="bg-background">
+                    {/* Post Header */}
+                    <div className="flex items-center justify-between px-3 py-2.5">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-full overflow-hidden instagram-gradient p-[1.5px]">
+                          <img
+                            src={profile.profile_pic_url}
+                            alt={profile.username}
+                            className="w-full h-full rounded-full object-cover"
+                          />
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-semibold text-sm text-foreground">{profile.username}</span>
+                          <span className="text-xs text-muted-foreground flex items-center gap-1">
+                            <Lock className="w-3 h-3" /> Amigos Próximos
+                          </span>
+                        </div>
                       </div>
-                    )}
-
-                    {/* Hover Overlay */}
-                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-6">
-                      <div className="flex items-center gap-1 text-white font-bold text-sm">
-                        <Heart className="w-5 h-5 fill-current" />
-                        <span>{formatNumber(post.likes)}</span>
-                      </div>
-                      <div className="flex items-center gap-1 text-white font-bold text-sm">
-                        <MessageCircle className="w-5 h-5 fill-current" />
-                        <span>{formatNumber(post.comments)}</span>
-                      </div>
+                      <button className="p-1">
+                        <MoreHorizontal className="w-5 h-5 text-foreground" />
+                      </button>
                     </div>
-                  </a>
-                ))}
-              </div>
-            )}
+
+                    {/* Post Image - BLOQUEADO */}
+                    <button 
+                      onClick={handleUnlock}
+                      className="relative w-full aspect-square bg-muted overflow-hidden group"
+                    >
+                      {/* Blurred Background Image */}
+                      <img
+                        src={post.thumbnail_url || post.display_url}
+                        alt="Conteúdo privado"
+                        className="w-full h-full object-cover blur-2xl scale-110"
+                      />
+                      
+                      {/* Overlay with Lock */}
+                      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center gap-3">
+                        <div className="w-16 h-16 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20">
+                          <Lock className="w-8 h-8 text-white" />
+                        </div>
+                        <div className="text-center">
+                          <p className="text-white font-semibold text-base">Conteúdo Privado</p>
+                          <p className="text-white/70 text-sm">Toque para desbloquear</p>
+                        </div>
+                        {post.is_video && (
+                          <div className="absolute top-4 right-4 bg-black/50 rounded-full p-2">
+                            <Play className="w-5 h-5 text-white fill-white" />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Private Badge */}
+                      <div className="absolute top-4 left-4 bg-green-500/90 backdrop-blur-sm rounded-full px-3 py-1 flex items-center gap-1.5">
+                        <Users className="w-3.5 h-3.5 text-white" />
+                        <span className="text-white text-xs font-semibold">Amigos Próximos</span>
+                      </div>
+                    </button>
+
+                    {/* Post Actions */}
+                    <div className="px-3 py-2.5">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-4">
+                          <button onClick={handleUnlock} className="hover:opacity-70 transition-opacity">
+                            <Heart className="w-6 h-6 text-foreground" />
+                          </button>
+                          <button onClick={handleUnlock} className="hover:opacity-70 transition-opacity">
+                            <MessageCircle className="w-6 h-6 text-foreground" />
+                          </button>
+                          <button onClick={handleUnlock} className="hover:opacity-70 transition-opacity">
+                            <Send className="w-6 h-6 text-foreground" />
+                          </button>
+                        </div>
+                        <button onClick={handleUnlock} className="hover:opacity-70 transition-opacity">
+                          <Bookmark className="w-6 h-6 text-foreground" />
+                        </button>
+                      </div>
+                      
+                      {/* Likes */}
+                      <button onClick={handleUnlock} className="flex items-center gap-1.5 mb-1">
+                        <span className="font-semibold text-sm text-foreground">
+                          {formatNumber(post.likes)} curtidas
+                        </span>
+                        <Lock className="w-3 h-3 text-muted-foreground" />
+                      </button>
+
+                      {/* Caption Preview - Oculto */}
+                      <div className="text-sm">
+                        <span className="font-semibold text-foreground">{profile.username}</span>
+                        <span className="text-muted-foreground ml-1.5">
+                          ••••••• ••••• •••••••• 
+                          <button onClick={handleUnlock} className="text-blue-400 ml-1">
+                            ver mais
+                          </button>
+                        </span>
+                      </div>
+
+                      {/* Comments - Ocultos */}
+                      <button onClick={handleUnlock} className="text-muted-foreground text-sm mt-1 flex items-center gap-1">
+                        <Lock className="w-3 h-3" />
+                        Ver todos os {formatNumber(post.comments)} comentários
+                      </button>
+                    </div>
+                  </article>
+                ))
+              )}
+            </div>
+
+            {/* Unlock Banner */}
+            <div className="sticky bottom-16 mx-4 mb-4">
+              <button
+                onClick={handleUnlock}
+                className="w-full bg-gradient-to-r from-pink-500 via-red-500 to-orange-500 text-white py-4 rounded-2xl font-bold text-lg shadow-lg shadow-pink-500/30 flex items-center justify-center gap-2 animate-pulse"
+              >
+                <Lock className="w-5 h-5" />
+                DESBLOQUEAR TODO CONTEÚDO
+              </button>
+            </div>
           </div>
         )}
       </main>
 
       {/* Bottom Navigation Bar - Instagram Style */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-background border-t border-border py-2 px-6 flex items-center justify-around">
+      <nav className="fixed bottom-0 left-0 right-0 bg-background border-t border-border py-2 px-6 flex items-center justify-around z-50">
+        <button className="p-2">
+          <Home className="w-7 h-7 text-foreground fill-foreground" />
+        </button>
         <button onClick={() => navigate('/')} className="p-2">
-          <svg className="w-7 h-7 text-foreground" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-            <polyline points="9 22 9 12 15 12 15 22"></polyline>
-          </svg>
+          <Search className="w-7 h-7 text-muted-foreground" />
         </button>
-        <button className="p-2">
-          <svg className="w-7 h-7 text-muted-foreground" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <circle cx="11" cy="11" r="8"></circle>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-          </svg>
+        <button onClick={handleUnlock} className="p-2">
+          <PlusSquare className="w-7 h-7 text-muted-foreground" />
         </button>
-        <button className="p-2">
-          <svg className="w-7 h-7 text-muted-foreground" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-            <line x1="12" y1="8" x2="12" y2="16"></line>
-            <line x1="8" y1="12" x2="16" y2="12"></line>
-          </svg>
-        </button>
-        <button className="p-2">
+        <button onClick={handleUnlock} className="p-2 relative">
           <Heart className="w-7 h-7 text-muted-foreground" />
+          <span className="absolute top-0 right-0 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">
+            9
+          </span>
         </button>
         <button className="p-2">
-          <div className="w-7 h-7 rounded-full bg-muted border-2 border-foreground"></div>
+          {profile ? (
+            <img 
+              src={profile.profile_pic_url} 
+              alt={profile.username}
+              className="w-7 h-7 rounded-full border-2 border-foreground object-cover"
+            />
+          ) : (
+            <div className="w-7 h-7 rounded-full bg-muted border-2 border-foreground" />
+          )}
         </button>
       </nav>
     </div>
